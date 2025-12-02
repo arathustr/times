@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,90 +10,231 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/leancloud-storage@4.15.0/dist/av-min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&display=swap');
-        body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; color: #1a1a1a; }
+        /* 引入经典报纸字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&family=Noto+Serif+SC:wght@300;400;700&display=swap');
+        
+        /* 核心字体设置 */
+        body { 
+            font-family: "Times New Roman", "Noto Serif SC", serif; /* 英文用Times，中文用宋体风格的Noto Serif */
+            background-color: #f9f9f7; /* 稍微带点暖色的纸张白 */
+            color: #1a1a1a; 
+        }
+        
+        /* 报头字体 */
         .masthead-font { font-family: 'UnifrakturMaguntia', serif; }
-        .headline-font { font-family: 'Libre Baskerville', serif; }
-        .sans-font { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* 英文标题字体 */
+        .headline-en { font-family: 'Libre Baskerville', serif; }
+        
+        /* 中文标题优化 */
+        .headline-cn { font-family: "Noto Serif SC", serif; font-weight: 700; }
+        
+        /* 无衬线功能字体 */
+        .sans-font { font-family: ui-sans-serif, system-ui, sans-serif; }
+        
+        /* 动画 */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 首字下沉效果 */
+        .drop-cap::first-letter {
+            float: left;
+            font-size: 3.5rem;
+            line-height: 0.8;
+            font-weight: bold;
+            margin-right: 0.5rem;
+            margin-top: 0.2rem;
+            font-family: 'UnifrakturMaguntia', serif;
+        }
+
+        /* 报纸风格的双分割线 */
+        .border-newspaper {
+            border-bottom: 1px solid #000;
+            box-shadow: 0 3px 0 0 #000; /* 用阴影模拟双线，一条细一条粗 */
+            margin-bottom: 3px;
+        }
     </style>
 </head>
-<body class="selection:bg-black selection:text-white min-h-screen">
+<body class="selection:bg-black selection:text-white min-h-screen pb-20">
+
     <div id="root"></div>
+
     <script type="text/babel" data-type="module">
         const { useState, useEffect } = React;
 
-        // LeanCloud 配置 (只读权限)
-        const LEANCLOUD_CONFIG = {
+        // LeanCloud 配置 (只读)
+        const LC_CONFIG = {
             appId: "BSxRnkRaWIbzt7TsiimZcZvF-gzGzoHsz",
             appKey: "EsCNZiqtD1VSWkIgtvrPdocp",
             serverURL: "https://bsxrnkra.lc-cn-n1-shared.com"
         };
 
         try {
-            AV.init({
-                appId: LEANCLOUD_CONFIG.appId,
-                appKey: LEANCLOUD_CONFIG.appKey,
-                serverURL: LEANCLOUD_CONFIG.serverURL
-            });
-        } catch (e) { console.error("LeanCloud Init Error:", e); }
+            AV.init({ appId: LC_CONFIG.appId, appKey: LC_CONFIG.appKey, serverURL: LC_CONFIG.serverURL });
+        } catch (e) { console.error("LC Init:", e); }
 
-        const NewspaperHeader = () => {
+        // --- 组件：报头 ---
+        const Header = ({ onHome }) => {
             const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             return (
-                <header className="border-b-4 border-black mb-8">
-                    <div className="flex justify-between items-center py-1 text-xs sans-font border-b border-gray-300 uppercase tracking-widest text-gray-500">
+                <header className="mb-8">
+                    {/* 顶栏信息 */}
+                    <div className="flex justify-between items-center py-2 text-[10px] md:text-xs sans-font border-b border-gray-300 uppercase tracking-widest text-gray-500">
                         <span>Vol. 1, No. 1</span>
                         <span>{dateStr}</span>
-                        <span>$1.00</span>
+                        <span>Private Edition • $1.00</span>
                     </div>
-                    <div className="text-center py-8 relative">
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl tracking-tight leading-none mb-4 masthead-font">
+                    
+                    {/* 主标题 */}
+                    <div className="text-center py-8 md:py-10 cursor-pointer" onClick={onHome}>
+                        <h1 className="text-5xl md:text-7xl lg:text-9xl tracking-tight leading-none mb-2 masthead-font hover:opacity-80 transition-opacity">
                             The Personal Times
                         </h1>
-                        <p className="italic text-lg text-gray-600 headline-font">"All the News That's Fit to Print (About Me)"</p>
+                        <p className="italic text-sm md:text-lg text-gray-600 headline-en">"All the News That's Fit to Print (About Me)"</p>
                     </div>
-                    <div className="border-t-2 border-b-2 border-black py-2 mb-1 flex justify-center space-x-8 text-sm font-bold uppercase tracking-widest overflow-x-auto sans-font">
-                        {['World', 'Tech', 'Life', 'Opinion', 'Arts'].map(cat => (
-                            <span key={cat} className="cursor-pointer hover:underline">{cat}</span>
+
+                    {/* 导航栏 */}
+                    <div className="border-newspaper py-2 mb-1 flex justify-center flex-wrap gap-4 md:gap-8 text-xs md:text-sm font-bold uppercase tracking-widest sans-font">
+                        {['World', 'Tech', 'Life', 'Opinion', 'Arts', 'Style', 'Travel'].map(cat => (
+                            <span key={cat} className="cursor-pointer hover:underline hover:text-red-800 transition-colors">{cat}</span>
                         ))}
                     </div>
                 </header>
             );
         };
 
-        const ArticleCard = ({ post }) => (
-            <article className="mb-8 border-b border-gray-200 pb-8 group animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    <div className="md:col-span-8">
-                        <div className="mb-2 flex items-center gap-2">
-                            <span className="text-xs sans-font font-bold uppercase tracking-widest text-gray-500 border border-gray-300 px-1 py-0.5">{post.category || 'General'}</span>
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-3 hover:text-gray-700 transition-colors cursor-pointer headline-font tracking-tight">{post.title}</h2>
-                        <div className="text-sm sans-font text-gray-500 mb-4 flex items-center gap-2">
-                            <span className="font-bold text-gray-900 uppercase">By {post.author || 'The Editor'}</span>
-                            <span>•</span>
-                            <span>{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Published'}</span>
-                        </div>
-                        <p className="text-lg leading-relaxed text-gray-900 text-justify mb-4 whitespace-pre-line">{post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : '')}</p>
+        // --- 组件：详情页 (The Article Page) ---
+        const PostDetail = ({ post, onBack }) => {
+            if (!post) return null;
+            return (
+                <div className="max-w-4xl mx-auto px-4 fade-in">
+                    {/* 顶部导航 */}
+                    <div className="mb-6 flex items-center gap-2 text-xs sans-font font-bold uppercase tracking-widest text-gray-400 cursor-pointer hover:text-black" onClick={onBack}>
+                        <span>← Back to Front Page</span>
                     </div>
-                    {post.imageUrl && (
-                        <div className="md:col-span-4">
-                            <div className="aspect-[4/3] bg-gray-100 overflow-hidden border border-gray-300 relative shadow-sm">
-                                <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-500" />
-                                <div className="absolute bottom-0 left-0 right-0 bg-white/80 p-1 text-[10px] sans-font text-gray-500 text-center border-t border-gray-200">Fig 1. Visual representation</div>
+
+                    {/* 文章头部 */}
+                    <article>
+                        <div className="text-center mb-8">
+                            <span className="inline-block border border-black px-2 py-0.5 text-xs font-bold uppercase sans-font mb-4 tracking-widest">
+                                {post.category || 'News'}
+                            </span>
+                            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 headline-cn text-gray-900">
+                                {post.title}
+                            </h1>
+                            <div className="flex justify-center items-center gap-4 text-sm sans-font text-gray-500 border-y border-gray-200 py-3 mt-6">
+                                <span className="font-bold text-black uppercase">By {post.author || 'The Editor'}</span>
+                                <span>|</span>
+                                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                                <span>|</span>
+                                <span>Read Time: 5 min</span>
                             </div>
                         </div>
-                    )}
-                </div>
-            </article>
-        );
 
+                        {/* 大图 */}
+                        {post.imageUrl && (
+                            <figure className="mb-10">
+                                <img src={post.imageUrl} className="w-full h-auto object-cover grayscale contrast-125 border border-gray-300 p-1 bg-white shadow-sm" alt="Cover" />
+                                <figcaption className="text-center text-xs sans-font text-gray-500 mt-2 italic">
+                                    Fig 1. A visual representation of the subject matter.
+                                </figcaption>
+                            </figure>
+                        )}
+
+                        {/* 正文内容 - 优化排版 */}
+                        <div className="max-w-2xl mx-auto text-lg md:text-xl leading-loose text-gray-900 text-justify font-serif tracking-wide space-y-6 drop-cap whitespace-pre-line">
+                            {post.content}
+                        </div>
+
+                        {/* 文章底部 */}
+                        <div className="max-w-2xl mx-auto mt-12 pt-8 border-t border-black text-center">
+                            <div className="text-3xl masthead-font mb-2">The Personal Times</div>
+                            <button onClick={onBack} className="text-sm sans-font font-bold uppercase border-b-2 border-black hover:bg-black hover:text-white transition-all">
+                                Return to Front Page
+                            </button>
+                        </div>
+                    </article>
+                </div>
+            );
+        };
+
+        // --- 组件：首页列表 (The Front Page) ---
+        const PostList = ({ posts, onRead }) => {
+            if (posts.length === 0) return <div className="text-center py-20 text-gray-400 italic">No news is good news... (Waiting for content)</div>;
+
+            const [latest, ...others] = posts;
+
+            return (
+                <div className="fade-in">
+                    {/* 头版头条 (Hero) */}
+                    <section className="mb-12 border-b-2 border-gray-200 pb-12 cursor-pointer group" onClick={() => onRead(latest)}>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                            {/* 左侧文字 (在大屏时) */}
+                            <div className="lg:col-span-4 lg:border-r lg:border-gray-200 lg:pr-8 h-full order-2 lg:order-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                     <span className="text-xs font-bold uppercase sans-font text-red-800">{latest.category || 'Breaking'}</span>
+                                     <span className="text-xs text-gray-400 sans-font">{new Date(latest.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-4 headline-cn group-hover:underline decoration-2 underline-offset-4">
+                                    {latest.title}
+                                </h2>
+                                <p className="text-lg leading-relaxed text-gray-600 text-justify line-clamp-6">
+                                    {latest.excerpt || latest.content}
+                                </p>
+                                <span className="inline-block mt-4 text-xs font-bold uppercase sans-font border-b border-gray-400">Continue Reading →</span>
+                            </div>
+
+                            {/* 右侧图片 (头条大图) */}
+                            <div className="lg:col-span-8 order-1 lg:order-2">
+                                {latest.imageUrl ? (
+                                    <div className="relative border border-gray-300 p-1 bg-white shadow-sm transition-transform duration-700 hover:shadow-md">
+                                        <img src={latest.imageUrl} className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-64 bg-gray-100 flex items-center justify-center border border-gray-300">
+                                        <span className="italic text-gray-400">No Image Available</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 次要新闻网格 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 border-t-4 border-black pt-8">
+                        {others.map(post => (
+                            <article key={post.id} className="group cursor-pointer flex flex-col h-full border-b border-gray-200 pb-8 md:border-none" onClick={() => onRead(post)}>
+                                {post.imageUrl && (
+                                    <div className="mb-4 overflow-hidden border border-gray-200">
+                                        <img src={post.imageUrl} className="w-full h-48 object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500" />
+                                    </div>
+                                )}
+                                <div className="flex-1">
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <span className="text-[10px] sans-font font-bold uppercase tracking-widest text-gray-500 border border-gray-300 px-1">{post.category || 'General'}</span>
+                                        <span className="text-[10px] sans-font text-gray-400">{new Date(post.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <h3 className="text-xl md:text-2xl font-bold leading-tight mb-2 headline-cn group-hover:text-gray-600 transition-colors">
+                                        {post.title}
+                                    </h3>
+                                    <p className="text-sm md:text-base leading-relaxed text-gray-700 text-justify line-clamp-4 font-serif">
+                                        {post.excerpt || post.content}
+                                    </p>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 主程序：路由与数据 ---
         const App = () => {
+            const [view, setView] = useState('home'); // 'home' | 'detail'
+            const [currentPost, setCurrentPost] = useState(null);
             const [posts, setPosts] = useState([]);
             const [loading, setLoading] = useState(true);
 
+            // 获取数据
             useEffect(() => {
                 const fetchPosts = async () => {
                     try {
@@ -111,28 +252,42 @@
                 fetchPosts();
             }, []);
 
+            // 路由处理
+            const goDetail = (post) => {
+                setCurrentPost(post);
+                setView('detail');
+                window.scrollTo(0, 0); // 跳转后置顶
+            };
+
+            const goHome = () => {
+                setView('home');
+                setCurrentPost(null);
+            };
+
             return (
-                <div className="max-w-6xl mx-auto px-4 py-4">
-                    <NewspaperHeader />
+                <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-4 bg-white shadow-2xl min-h-screen my-4 border border-gray-200">
+                    <Header onHome={goHome} />
+                    
                     {loading ? (
-                        <div className="py-20 text-center italic text-gray-400">Fetching the latest edition...</div>
-                    ) : posts.length === 0 ? (
-                        <div className="py-20 text-center border-4 border-double border-gray-200 p-10">
-                            <h2 className="text-3xl mb-4 headline-font">Extra! Extra!</h2>
-                            <p className="text-gray-500 mb-6">No stories available.</p>
+                        <div className="py-40 text-center font-serif">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
+                            <p className="text-gray-500 italic">Printing the latest edition...</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                            {posts.map(p => <ArticleCard key={p.id} post={p} />)}
-                        </div>
+                        view === 'home' 
+                            ? <PostList posts={posts} onRead={goDetail} /> 
+                            : <PostDetail post={currentPost} onBack={goHome} />
                     )}
-                    <footer className="mt-20 border-t-4 border-black pt-8 pb-12 text-center">
-                        <div className="masthead-font text-3xl mb-4">The Personal Times</div>
-                        <p className="text-xs sans-font text-gray-500 uppercase tracking-widest">© {new Date().getFullYear()} Private Edition.</p>
+
+                    <footer className="mt-20 border-t-4 border-black pt-8 pb-8 text-center">
+                        <p className="text-[10px] sans-font text-gray-500 uppercase tracking-widest">
+                            © {new Date().getFullYear()} The Personal Times. No Rights Reserved (Just kidding).
+                        </p>
                     </footer>
                 </div>
             );
         };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
